@@ -1,5 +1,3 @@
-#define STM32_SRC_PLLI2S_R	(STM32_SRC_PLL_R + 1)
-
 / {
     soc {
         i2s2: i2s@40003800 {
