@@ -1,0 +1,65 @@
+#define STM32_SRC_PLLI2S_R	(STM32_SRC_PLL_R + 1)
+
+/ {
+    soc {
+        i2s2: i2s@40003800 {
+            compatible = "st,stm32-i2s";
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0x40003800 0x400>;
+            clocks = <&rcc STM32_CLOCK_BUS_APB1 0x00004000>, <&rcc STM32_SRC_PLLI2S_R I2S_SEL(0)>;
+            interrupts = <36 5>;
+            dmas = <&dma1 3 0 0x400 0x3>;
+            dma-names = "rx";
+            pinctrl-0 = <&i2s2_ck_pb13 &i2s2_sd_pb15>;
+            pinctrl-names = "default";
+            status = "okay";
+
+            mp34dt06j: mp34dt06j@0{
+                compatible = "st,mpxxdtyy";
+                status = "okay";
+                reg = <0x0>;
+            };
+        
+        };
+    };
+
+    clocks {
+		plli2s: plli2s {
+			#clock-cells = <0>;
+			compatible = "st,stm32f4-plli2s-clock";
+            mul-n = <192>;
+            div-r = <5>;
+            clocks = <&clk_hse>;
+            clock-names = "plli2s";
+			status = "okay";
+		};
+	};
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(216)>;
+	ahb-prescaler = <1>;
+	apb1-prescaler = <4>;
+	apb2-prescaler = <2>;
+};
+
+&pll {
+	div-m = <8>;
+	mul-n = <432>;
+	div-p = <2>;
+	div-q = <9>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+// Conflicts with I2S2 on PB13
+&mac {
+    status = "disabled";
+    pinctrl-0 = <>;
+};
+
+&dma1 {
+    status = "okay";
+};
