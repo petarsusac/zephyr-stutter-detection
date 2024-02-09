@@ -11,7 +11,7 @@
 
 #include <zephyr/logging/log.h>
 
-#define MAX_SAMPLE_RATE 16000
+#define SAMPLE_RATE 16000
 #define SAMPLE_BIT_WIDTH 16
 #define BYTES_PER_SAMPLE sizeof(int16_t)
 
@@ -20,9 +20,9 @@
 #define BLOCK_SIZE(_sample_rate, _number_of_channels) \
 	(BYTES_PER_SAMPLE * (_sample_rate / 10) * _number_of_channels)
 
-#define MAX_BLOCK_SIZE   BLOCK_SIZE(MAX_SAMPLE_RATE, 2)
+#define SINGLE_BLOCK_SIZE   BLOCK_SIZE(SAMPLE_RATE, 1)
 #define BLOCK_COUNT      4
-K_MEM_SLAB_DEFINE_STATIC(mem_slab, MAX_BLOCK_SIZE, BLOCK_COUNT, 4);
+K_MEM_SLAB_DEFINE_STATIC(mem_slab, SINGLE_BLOCK_SIZE, BLOCK_COUNT, 4);
 
 LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
 
@@ -32,8 +32,8 @@ static const struct device *const dmic_dev = DEVICE_DT_GET(DT_NODELABEL(mp34dt06
 static struct pcm_stream_cfg stream = {
 	.pcm_width = SAMPLE_BIT_WIDTH,
 	.mem_slab  = &mem_slab,
-	.pcm_rate = MAX_SAMPLE_RATE,
-	.block_size = BLOCK_SIZE(MAX_SAMPLE_RATE, 1),
+	.pcm_rate = SAMPLE_RATE,
+	.block_size = SINGLE_BLOCK_SIZE,
 };
 
 static struct dmic_cfg cfg = {
