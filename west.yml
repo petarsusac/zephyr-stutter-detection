@@ -19,3 +19,5 @@ manifest:
         name-allowlist:
           - cmsis
           - hal_stm32
+          - hal_st
+          - segger
