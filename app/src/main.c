@@ -42,8 +42,8 @@ static struct dmic_cfg cfg = {
 			* configurations that the driver is allowed to use
 			* to those supported by the microphone.
 			*/
-		.min_pdm_clk_freq = 1800000,
-		.max_pdm_clk_freq = 2500000,
+		.min_pdm_clk_freq = 1200000,
+		.max_pdm_clk_freq = 3250000,
 	},
 	.streams = &stream,
 	.channel = {
