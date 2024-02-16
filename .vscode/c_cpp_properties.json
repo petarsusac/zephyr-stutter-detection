@@ -1,17 +1,10 @@
 {
     "configurations": [
         {
-            "name": "Linux",
-            "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/../zephyr/include",
-                "${workspaceFolder}/app/build/zephyr/include/**"
-            ],
-            "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compileCommands": "${workspaceFolder}/app/build/compile_commands.json",
+            "intelliSenseMode": "linux-gcc-x64",
             "cStandard": "c17",
-            "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "cppStandard": "gnu++17"
         }
     ],
     "version": 4
