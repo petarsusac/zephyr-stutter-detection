@@ -3,29 +3,34 @@
     "configurations": [
         {
             "name": "Launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/app/build/zephyr/zephyr.elf",
+            "serverpath": "/opt/SEGGER/JLink/JLinkGDBServer",
+            "servertype": "jlink",
             "device": "STM32F746ZG",
-            "cwd": "${workspaceFolder}/app",
-            "executable": "build/zephyr/zephyr.elf",
-            "request": "launch",
+            "interface": "swd",
             "type": "cortex-debug",
-            "runToEntryPoint": "main",
-            "servertype": "openocd",
-            "configFiles": ["${workspaceFolder}/../zephyr/boards/arm/nucleo_f746zg/support/openocd.cfg"],
+            "request": "launch",
+            "armToolchainPath": "${userHome}/zephyr-sdk-0.16.5/arm-zephyr-eabi/bin/",
             "gdbPath": "${userHome}/zephyr-sdk-0.16.5/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb",
-            "preLaunchTask": "West Build"
+            "rtos": "Zephyr",
+            "toolchainPrefix": "arm-zephyr-eabi",
+            "runToEntryPoint": "main"
         },
         {
             "name": "Attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/app/build/zephyr/zephyr.elf",
+            "serverpath": "/opt/SEGGER/JLink/JLinkGDBServer",
+            "servertype": "jlink",
             "device": "STM32F746ZG",
-            "cwd": "${workspaceFolder}/app",
-            "executable": "build/zephyr/zephyr.elf",
-            "request": "attach",
+            "interface": "swd",
             "type": "cortex-debug",
-            "runToEntryPoint": "main",
-            "servertype": "openocd",
-            "configFiles": ["${workspaceFolder}/../zephyr/boards/arm/nucleo_f746zg/support/openocd.cfg"],
+            "request": "attach",
+            "armToolchainPath": "${userHome}/zephyr-sdk-0.16.5/arm-zephyr-eabi/bin/",
             "gdbPath": "${userHome}/zephyr-sdk-0.16.5/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb",
-            "showDevDebugOutput": "raw"
+            "rtos": "Zephyr",
+            "toolchainPrefix": "arm-zephyr-eabi"
         },
-    ]
+    ],
 }
