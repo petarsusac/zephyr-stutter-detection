@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #define MICROPHONE_SAMPLE_RATE 16000
+#define MICROPHONE_BLOCK_SIZE_MS 2
 
 int microphone_init(const struct device *p_mic_dev);
 
