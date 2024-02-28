@@ -12,7 +12,7 @@
 
 #include "microphone.h"
 
-#define AUDIO_BUF_SIZE_MS 	1000
+#define AUDIO_BUF_SIZE_MS 	6000
 #define AUDIO_BUF_SIZE 		((MICROPHONE_SAMPLE_RATE * AUDIO_BUF_SIZE_MS) / MSEC_PER_SEC)
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
@@ -35,7 +35,8 @@ int main(void)
 
 	microphone_init(p_mic_dev);
 	microphone_start(p_mic_dev);
-	microphone_fill_buffer(p_mic_dev, (int16_t *) audio_buf, AUDIO_BUF_SIZE);
+	microphone_fill_buffer(p_mic_dev, &audio_buf[0], AUDIO_BUF_SIZE / 2);
+	microphone_fill_buffer(p_mic_dev, &audio_buf[AUDIO_BUF_SIZE / 2], AUDIO_BUF_SIZE / 2);
 	microphone_stop(p_mic_dev);
 
 	print_buffer(p_uart_dev, audio_buf, AUDIO_BUF_SIZE);
