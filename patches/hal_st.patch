@@ -1,0 +1,71 @@
+diff --git a/audio/microphone/OpenPDMFilter.c b/audio/microphone/OpenPDMFilter.c
+index 56b2f06..109b367 100644
+--- a/audio/microphone/OpenPDMFilter.c
++++ b/audio/microphone/OpenPDMFilter.c
+@@ -311,3 +311,41 @@ void Open_PDM_Filter_128(uint8_t* data, uint16_t* dataOut, uint16_t volume, TPDM
+   Param->OldIn = OldIn;
+   Param->OldZ = OldZ;
+ }
++
++void Open_PDM_Filter_192(uint8_t* data, uint16_t* dataOut, uint16_t volume, TPDMFilter_InitStruct *Param)
++{
++  uint8_t i, data_out_index;
++  uint8_t channels = Param->In_MicChannels;
++  uint8_t data_inc = ((DECIMATION_MAX >> 3) * channels);
++  int64_t Z, Z0, Z1, Z2;
++  int64_t OldOut, OldIn, OldZ;
++
++  OldOut = Param->OldOut;
++  OldIn = Param->OldIn;
++  OldZ = Param->OldZ;
++
++  for (i = 0, data_out_index = 0; i < Param->Fs / 1000; i++, data_out_index += channels) {
++    Z0 = filter_table(data, 0, Param);
++    Z1 = filter_table(data, 1, Param);
++    Z2 = filter_table(data, 2, Param);
++
++    Z = Param->Coef[1] + Z2 - sub_const;
++    Param->Coef[1] = Param->Coef[0] + Z1;
++    Param->Coef[0] = Z0;
++
++    OldOut = (Param->HP_ALFA * (OldOut + Z - OldIn)) >> 8;
++    OldIn = Z;
++    OldZ = ((256 - Param->LP_ALFA) * OldZ + Param->LP_ALFA * OldOut) >> 8;
++
++    Z = OldZ * volume;
++    Z = RoundDiv(Z, div_const);
++    Z = SaturaLH(Z, -32700, 32700);
++
++    dataOut[data_out_index] = Z;
++    data += data_inc;
++  }
++
++  Param->OldOut = OldOut;
++  Param->OldIn = OldIn;
++  Param->OldZ = OldZ;
++}
+diff --git a/audio/microphone/OpenPDMFilter.h b/audio/microphone/OpenPDMFilter.h
+index 6094391..7763bc0 100644
+--- a/audio/microphone/OpenPDMFilter.h
++++ b/audio/microphone/OpenPDMFilter.h
+@@ -49,10 +49,10 @@
+  * and RAM memory.
+  * Note: Without Look-Up Table up to stereo@16KHz configuration is supported.
+  */
+-#define USE_LUT
++// #define USE_LUT
+ 
+ #define SINCN            3
+-#define DECIMATION_MAX 128
++#define DECIMATION_MAX 192
+ #define FILTER_GAIN     16
+ 
+ #define HTONS(A) ((((uint16_t)(A) & 0xff00) >> 8) | \
+@@ -89,6 +89,7 @@ void Open_PDM_Filter_Init(TPDMFilter_InitStruct *init_struct);
+ void Open_PDM_Filter_64(uint8_t* data, uint16_t* data_out, uint16_t mic_gain, TPDMFilter_InitStruct *init_struct);
+ void Open_PDM_Filter_128(uint8_t* data, uint16_t* data_out, uint16_t mic_gain, TPDMFilter_InitStruct *init_struct);
+ 
++void Open_PDM_Filter_192(uint8_t* data, uint16_t* data_out, uint16_t mic_gain, TPDMFilter_InitStruct *init_struct);
+ #ifdef __cplusplus
+ }
+ #endif
