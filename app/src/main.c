@@ -11,6 +11,7 @@
 #include <zephyr/logging/log.h>
 
 #include "microphone.h"
+#include "inference.h"
 
 #define AUDIO_BUF_SIZE_MS 	6000
 #define AUDIO_BUF_SIZE 		((MICROPHONE_SAMPLE_RATE * AUDIO_BUF_SIZE_MS) / MSEC_PER_SEC)
@@ -39,7 +40,11 @@ int main(void)
 	microphone_fill_buffer(p_mic_dev, &audio_buf[AUDIO_BUF_SIZE / 2], AUDIO_BUF_SIZE / 2);
 	microphone_stop(p_mic_dev);
 
-	print_buffer(p_uart_dev, audio_buf, AUDIO_BUF_SIZE);
+	// print_buffer(p_uart_dev, audio_buf, AUDIO_BUF_SIZE);
+
+	inference_setup();
+
+	inference_run();
 
 	k_sleep(K_FOREVER);
 

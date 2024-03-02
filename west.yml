@@ -21,3 +21,6 @@ manifest:
           - hal_stm32
           - hal_st
           - segger
+          - tflite-micro
+          - cmsis-nn
+          - cmsis-dsp
