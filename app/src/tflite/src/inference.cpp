@@ -63,5 +63,19 @@ int inference_setup(void)
 
 float inference_run(void)
 {
-    return 0;
+	for (int i = 0; i < 13; i++)
+	{
+		for (int j = 0; j < 47; j++)
+		{
+			input->data.int8[i*47 + j] = input_data[i][j] / input->params.scale + input->params.zero_point;
+		}
+	}
+
+	TfLiteStatus invoke_status = interpreter->Invoke();
+	if (invoke_status != kTfLiteOk) {
+		return -1;
+	}
+
+	int8_t output_quantized = output->data.int8[0];
+	return (output_quantized - output->params.zero_point) * output->params.scale;
 }

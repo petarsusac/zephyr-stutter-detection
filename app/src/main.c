@@ -40,13 +40,25 @@ int main(void)
 	microphone_fill_buffer(p_mic_dev, &audio_buf[AUDIO_BUF_SIZE / 2], AUDIO_BUF_SIZE / 2);
 	microphone_stop(p_mic_dev);
 
-	// print_buffer(p_uart_dev, audio_buf, AUDIO_BUF_SIZE);
+	print_buffer(p_uart_dev, audio_buf, AUDIO_BUF_SIZE);
 
 	inference_setup();
 
-	inference_run();
+	int64_t start_ms = k_uptime_get();
 
-	k_sleep(K_FOREVER);
+	float result = inference_run();
+	if (-1 == result)
+	{
+		LOG_ERR("Inference failed");
+	}
+	else
+	{
+		LOG_INF("Result: %d", (int) (result * 100));
+	}
+
+	int64_t diff = k_uptime_delta(&start_ms);
+
+	LOG_INF("Elapsed: %lld ms", diff);
 
 	return 0;
 }
