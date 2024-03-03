@@ -1,17 +1,28 @@
 diff --git a/drivers/audio/mpxxdtyy-i2s.c b/drivers/audio/mpxxdtyy-i2s.c
-index a2eb2103bc..8e723ae3de 100644
+index a2eb2103bc..3c44fe224f 100644
 --- a/drivers/audio/mpxxdtyy-i2s.c
 +++ b/drivers/audio/mpxxdtyy-i2s.c
-@@ -16,7 +16,7 @@ LOG_MODULE_DECLARE(mpxxdtyy);
+@@ -16,9 +16,17 @@ LOG_MODULE_DECLARE(mpxxdtyy);
  #if DT_ANY_INST_ON_BUS_STATUS_OKAY(i2s)
  
  #define NUM_RX_BLOCKS			4
 -#define PDM_BLOCK_MAX_SIZE_BYTES	512
 +#define PDM_BLOCK_MAX_SIZE_BYTES	768
  
- K_MEM_SLAB_DEFINE(rx_pdm_i2s_mslab, PDM_BLOCK_MAX_SIZE_BYTES, NUM_RX_BLOCKS, 1);
+-K_MEM_SLAB_DEFINE(rx_pdm_i2s_mslab, PDM_BLOCK_MAX_SIZE_BYTES, NUM_RX_BLOCKS, 1);
++#define K_MEM_SLAB_DEFINE_NOCACHE(name, slab_block_size, slab_num_blocks, slab_align) \
++	char __nocache \
++	   __aligned(WB_UP(slab_align)) \
++	   _k_mem_slab_buf_##name[(slab_num_blocks) * WB_UP(slab_block_size)]; \
++	STRUCT_SECTION_ITERABLE(k_mem_slab, name) = \
++		Z_MEM_SLAB_INITIALIZER(name, _k_mem_slab_buf_##name, \
++					WB_UP(slab_block_size), slab_num_blocks)
++
++K_MEM_SLAB_DEFINE_NOCACHE(rx_pdm_i2s_mslab, PDM_BLOCK_MAX_SIZE_BYTES, NUM_RX_BLOCKS, 1);
  
-@@ -126,8 +126,7 @@ int mpxxdtyy_i2s_configure(const struct device *dev, struct dmic_cfg *cfg)
+ int mpxxdtyy_i2s_read(const struct device *dev, uint8_t stream, void **buffer,
+ 		      size_t *size, int32_t timeout)
+@@ -126,8 +134,7 @@ int mpxxdtyy_i2s_configure(const struct device *dev, struct dmic_cfg *cfg)
  
  	i2s_cfg.word_size = chan_size;
  	i2s_cfg.channels = cfg->channel.req_num_chan;
