@@ -19,12 +19,15 @@
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 static int print_buffer(const struct device *p_uart, int16_t *buf, size_t len);
+static void inference_thread_run(void *p1, void *p2, void *p3);
 
 static struct gpio_dt_spec p_led_dev = GPIO_DT_SPEC_GET(DT_ALIAS(led2), gpios);
 static const struct device *const p_mic_dev = DEVICE_DT_GET(DT_NODELABEL(mp34dt06j));
 static const struct device *const p_uart_dev = DEVICE_DT_GET(DT_NODELABEL(usart2));
 
 static int16_t audio_buf[AUDIO_BUF_SIZE];
+
+K_THREAD_DEFINE(inference_thread, 2048, inference_thread_run, NULL, NULL, NULL, 1, 0, 0);
 
 int main(void)
 {
@@ -42,23 +45,7 @@ int main(void)
 
 	print_buffer(p_uart_dev, audio_buf, AUDIO_BUF_SIZE);
 
-	inference_setup();
-
-	int64_t start_ms = k_uptime_get();
-
-	float result = inference_run();
-	if (-1 == result)
-	{
-		LOG_ERR("Inference failed");
-	}
-	else
-	{
-		LOG_INF("Result: %d", (int) (result * 100));
-	}
-
-	int64_t diff = k_uptime_delta(&start_ms);
-
-	LOG_INF("Elapsed: %lld ms", diff);
+	k_sleep(K_FOREVER);
 
 	return 0;
 }
@@ -83,5 +70,28 @@ static int print_buffer(const struct device *p_uart, int16_t *buf, size_t len)
 	}
 
 	return 0;
+}
+
+static void inference_thread_run(void *p1, void *p2, void *p3)
+{
+	inference_setup();
+
+	int64_t start_ms = k_uptime_get();
+
+	float result = inference_run();
+	if (-1 == result)
+	{
+		LOG_ERR("Inference failed");
+	}
+	else
+	{
+		LOG_INF("Result: %d", (int) (result * 100));
+	}
+
+	int64_t diff = k_uptime_delta(&start_ms);
+
+	LOG_INF("Elapsed: %lld ms", diff);
+
+	k_sleep(K_FOREVER);
 }
 
