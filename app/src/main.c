@@ -74,18 +74,30 @@ static int print_buffer(const struct device *p_uart, int16_t *buf, size_t len)
 
 static void inference_thread_run(void *p1, void *p2, void *p3)
 {
-	inference_setup();
+	int ret;
+	output_values_t output;
+	
+	ret = inference_setup();
+
+	if (ret != 0)
+	{
+		return;
+	}
 
 	int64_t start_ms = k_uptime_get();
 
-	float result = inference_run();
-	if (-1 == result)
+	ret = inference_run(&output);
+
+	if (ret != 0)
 	{
 		LOG_ERR("Inference failed");
 	}
 	else
 	{
-		LOG_INF("Result: %d", (int) (result * 100));
+		LOG_INF("Block: %d%%", (int) (output.block * 100));
+		LOG_INF("Prolongation: %d%%", (int) (output.prolongation * 100));
+		LOG_INF("SoundRep: %d%%", (int) (output.sound_rep * 100));
+		LOG_INF("WordRep: %d%%", (int) (output.word_rep * 100));
 	}
 
 	int64_t diff = k_uptime_delta(&start_ms);

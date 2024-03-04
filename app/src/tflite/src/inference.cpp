@@ -18,7 +18,9 @@ namespace {
 	const tflite::Model *model = nullptr;
 	tflite::MicroInterpreter *interpreter = nullptr;
 	TfLiteTensor *input = nullptr;
-	TfLiteTensor *output = nullptr;
+
+	constexpr int outputs_len = 4;
+	TfLiteTensor *outputs[outputs_len] = {nullptr};
 
 	constexpr int kTensorArenaSize = 100 * 1024;
 	uint8_t tensor_arena[kTensorArenaSize];
@@ -56,12 +58,15 @@ int inference_setup(void)
 	}
 
     input = interpreter->input(0);
-	output = interpreter->output(0);
+	for (int i = 0; i < outputs_len; i++)
+	{
+		outputs[i] = interpreter->output(i);
+	}
 
     return 0;
 }
 
-float inference_run(void)
+int inference_run(output_values_t *output_val)
 {
 	for (int i = 0; i < 13; i++)
 	{
@@ -76,6 +81,10 @@ float inference_run(void)
 		return -1;
 	}
 
-	int8_t output_quantized = output->data.int8[0];
-	return (output_quantized - output->params.zero_point) * output->params.scale;
+	output_val->block = (outputs[0]->data.int8[0] - outputs[0]->params.zero_point) * outputs[0]->params.scale;
+	output_val->prolongation = (outputs[1]->data.int8[0] - outputs[1]->params.zero_point) * outputs[1]->params.scale;
+	output_val->word_rep = (outputs[2]->data.int8[0] - outputs[2]->params.zero_point) * outputs[2]->params.scale;
+	output_val->sound_rep = (outputs[3]->data.int8[0] - outputs[3]->params.zero_point) * outputs[3]->params.scale;
+
+	return 0;
 }
