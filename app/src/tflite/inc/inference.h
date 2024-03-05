@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include <stddef.h>
+
 typedef struct output_values 
 {
     float block;
@@ -14,7 +16,7 @@ typedef struct output_values
 } output_values_t;
 
 int inference_setup(void);
-int inference_run(output_values_t *output_val);
+int inference_run(float *p_input, size_t input_len, output_values_t *p_output_val);
 
 #ifdef __cplusplus
 }

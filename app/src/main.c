@@ -12,9 +12,11 @@
 
 #include "microphone.h"
 #include "inference.h"
+#include "mfcc.h"
 
 #define AUDIO_BUF_SIZE_MS 	6000
 #define AUDIO_BUF_SIZE 		((MICROPHONE_SAMPLE_RATE * AUDIO_BUF_SIZE_MS) / MSEC_PER_SEC)
+#define FEATURE_SIZE 		(13*43)
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
@@ -27,7 +29,8 @@ static const struct device *const p_uart_dev = DEVICE_DT_GET(DT_NODELABEL(usart2
 
 static int16_t audio_buf[AUDIO_BUF_SIZE];
 
-K_THREAD_DEFINE(inference_thread, 2048, inference_thread_run, NULL, NULL, NULL, 1, 0, 0);
+K_THREAD_DEFINE(inference_thread, 4096, inference_thread_run, NULL, NULL, NULL, 1, 0, 0);
+K_SEM_DEFINE(inference_run_sem, 0, 1);
 
 int main(void)
 {
@@ -39,9 +42,14 @@ int main(void)
 
 	microphone_init(p_mic_dev);
 	microphone_start(p_mic_dev);
-	microphone_fill_buffer(p_mic_dev, &audio_buf[0], AUDIO_BUF_SIZE / 2);
-	microphone_fill_buffer(p_mic_dev, &audio_buf[AUDIO_BUF_SIZE / 2], AUDIO_BUF_SIZE / 2);
-	microphone_stop(p_mic_dev);
+
+	for(;;)
+	{
+		microphone_fill_buffer(p_mic_dev, &audio_buf[0], AUDIO_BUF_SIZE / 2);
+		k_sem_give(&inference_run_sem);
+		microphone_fill_buffer(p_mic_dev, &audio_buf[AUDIO_BUF_SIZE / 2], AUDIO_BUF_SIZE / 2);
+		k_sem_give(&inference_run_sem);
+	}
 
 	print_buffer(p_uart_dev, audio_buf, AUDIO_BUF_SIZE);
 
@@ -75,34 +83,50 @@ static int print_buffer(const struct device *p_uart, int16_t *buf, size_t len)
 static void inference_thread_run(void *p1, void *p2, void *p3)
 {
 	int ret;
+	float mfcc[FEATURE_SIZE];
 	output_values_t output;
+	size_t start_idx = 0;
+
+	ret = mfcc_init();
+	if (ret != 0)
+	{
+		return;
+	}
 	
 	ret = inference_setup();
-
 	if (ret != 0)
 	{
 		return;
 	}
 
-	int64_t start_ms = k_uptime_get();
-
-	ret = inference_run(&output);
-
-	if (ret != 0)
+	for (;;)
 	{
-		LOG_ERR("Inference failed");
-	}
-	else
-	{
-		LOG_INF("Block: %d%%", (int) (output.block * 100));
-		LOG_INF("Prolongation: %d%%", (int) (output.prolongation * 100));
-		LOG_INF("SoundRep: %d%%", (int) (output.sound_rep * 100));
-		LOG_INF("WordRep: %d%%", (int) (output.word_rep * 100));
-	}
+		k_sem_take(&inference_run_sem, K_FOREVER);
 
-	int64_t diff = k_uptime_delta(&start_ms);
+		int64_t start_ms = k_uptime_get();
 
-	LOG_INF("Elapsed: %lld ms", diff);
+		mfcc_run(&audio_buf[start_idx], mfcc, AUDIO_BUF_SIZE / 2);
+
+		ret = inference_run(mfcc, FEATURE_SIZE, &output);
+
+		if (ret != 0)
+		{
+			LOG_ERR("Inference failed");
+		}
+		else
+		{
+			LOG_INF("Block: %d%%", (int) (output.block * 100));
+			LOG_INF("Prolongation: %d%%", (int) (output.prolongation * 100));
+			LOG_INF("SoundRep: %d%%", (int) (output.sound_rep * 100));
+			LOG_INF("WordRep: %d%%", (int) (output.word_rep * 100));
+		}
+
+		int64_t diff = k_uptime_delta(&start_ms);
+
+		LOG_INF("Elapsed: %lld ms", diff);
+
+		start_idx = (0 == start_idx) ? (AUDIO_BUF_SIZE / 2) : 0;
+	}
 
 	k_sleep(K_FOREVER);
 }

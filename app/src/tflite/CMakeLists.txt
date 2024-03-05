@@ -9,5 +9,4 @@ target_include_directories(app PRIVATE inc)
 target_sources(app PRIVATE 
     src/model.cpp
     src/inference.cpp
-    src/input_data.cpp
 )

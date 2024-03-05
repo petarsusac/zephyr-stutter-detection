@@ -12,8 +12,6 @@
 
 LOG_MODULE_REGISTER(inference, LOG_LEVEL_DBG);
 
-extern const float input_data[13][47];
-
 namespace {
 	const tflite::Model *model = nullptr;
 	tflite::MicroInterpreter *interpreter = nullptr;
@@ -66,14 +64,11 @@ int inference_setup(void)
     return 0;
 }
 
-int inference_run(output_values_t *output_val)
+int inference_run(float *p_input, size_t input_len, output_values_t *p_output_val)
 {
-	for (int i = 0; i < 13; i++)
+	for (size_t i = 0; i < input_len; i++)
 	{
-		for (int j = 0; j < 47; j++)
-		{
-			input->data.int8[i*47 + j] = input_data[i][j] / input->params.scale + input->params.zero_point;
-		}
+		input->data.int8[i] = p_input[i] / input->params.scale + input->params.zero_point;
 	}
 
 	TfLiteStatus invoke_status = interpreter->Invoke();
@@ -81,10 +76,10 @@ int inference_run(output_values_t *output_val)
 		return -1;
 	}
 
-	output_val->block = (outputs[0]->data.int8[0] - outputs[0]->params.zero_point) * outputs[0]->params.scale;
-	output_val->prolongation = (outputs[1]->data.int8[0] - outputs[1]->params.zero_point) * outputs[1]->params.scale;
-	output_val->word_rep = (outputs[2]->data.int8[0] - outputs[2]->params.zero_point) * outputs[2]->params.scale;
-	output_val->sound_rep = (outputs[3]->data.int8[0] - outputs[3]->params.zero_point) * outputs[3]->params.scale;
+	p_output_val->block = (outputs[0]->data.int8[0] - outputs[0]->params.zero_point) * outputs[0]->params.scale;
+	p_output_val->prolongation = (outputs[1]->data.int8[0] - outputs[1]->params.zero_point) * outputs[1]->params.scale;
+	p_output_val->word_rep = (outputs[2]->data.int8[0] - outputs[2]->params.zero_point) * outputs[2]->params.scale;
+	p_output_val->sound_rep = (outputs[3]->data.int8[0] - outputs[3]->params.zero_point) * outputs[3]->params.scale;
 
 	return 0;
 }
