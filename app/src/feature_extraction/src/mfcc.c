@@ -32,9 +32,9 @@
 #define HOP_LEN 512U        /* Number of overlapping samples between successive frames */
 #define NUM_MELS 128U       /* Number of mel bands */
 #define NUM_MEL_COEFS 2023U /* Number of mel filter weights. Returned by MelFilterbank_Init */
-#define NUM_MFCC 13U        /* Number of MFCCs to return */
+#define NUM_MFCC 20U        /* Number of MFCCs to return */
 
-#define GAIN (0.75)
+#define GAIN (1.00)
 
 LOG_MODULE_REGISTER(mfcc, LOG_LEVEL_DBG);
 

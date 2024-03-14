@@ -17,10 +17,10 @@ namespace {
 	tflite::MicroInterpreter *interpreter = nullptr;
 	TfLiteTensor *input = nullptr;
 
-	constexpr int outputs_len = 4;
+	constexpr int outputs_len = 3;
 	TfLiteTensor *outputs[outputs_len] = {nullptr};
 
-	constexpr int kTensorArenaSize = 100 * 1024;
+	constexpr int kTensorArenaSize = 80 * 1024;
 	uint8_t tensor_arena[kTensorArenaSize];
 }  /* namespace */
 
@@ -78,8 +78,7 @@ int inference_run(float *p_input, size_t input_len, output_values_t *p_output_va
 
 	p_output_val->block = (outputs[0]->data.int8[0] - outputs[0]->params.zero_point) * outputs[0]->params.scale;
 	p_output_val->prolongation = (outputs[1]->data.int8[0] - outputs[1]->params.zero_point) * outputs[1]->params.scale;
-	p_output_val->word_rep = (outputs[2]->data.int8[0] - outputs[2]->params.zero_point) * outputs[2]->params.scale;
-	p_output_val->sound_rep = (outputs[3]->data.int8[0] - outputs[3]->params.zero_point) * outputs[3]->params.scale;
+	p_output_val->repetition = (outputs[2]->data.int8[0] - outputs[2]->params.zero_point) * outputs[2]->params.scale;
 
 	return 0;
 }

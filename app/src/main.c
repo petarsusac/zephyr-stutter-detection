@@ -16,7 +16,7 @@
 
 #define AUDIO_BUF_SIZE_MS 	6000
 #define AUDIO_BUF_SIZE 		((MICROPHONE_SAMPLE_RATE * AUDIO_BUF_SIZE_MS) / MSEC_PER_SEC)
-#define FEATURE_SIZE 		(13*43)
+#define FEATURE_SIZE 		(20*43)
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
@@ -29,7 +29,7 @@ static const struct device *const p_uart_dev = DEVICE_DT_GET(DT_NODELABEL(usart2
 
 static int16_t audio_buf[AUDIO_BUF_SIZE];
 
-K_THREAD_DEFINE(inference_thread, 4096, inference_thread_run, NULL, NULL, NULL, 1, 0, 0);
+K_THREAD_DEFINE(inference_thread, 8*1024, inference_thread_run, NULL, NULL, NULL, 1, 0, 0);
 K_SEM_DEFINE(inference_run_sem, 0, 1);
 
 int main(void)
@@ -117,8 +117,7 @@ static void inference_thread_run(void *p1, void *p2, void *p3)
 		{
 			LOG_INF("Block: %d%%", (int) (output.block * 100));
 			LOG_INF("Prolongation: %d%%", (int) (output.prolongation * 100));
-			LOG_INF("SoundRep: %d%%", (int) (output.sound_rep * 100));
-			LOG_INF("WordRep: %d%%", (int) (output.word_rep * 100));
+			LOG_INF("Repetition: %d%%", (int) (output.repetition * 100));
 		}
 
 		int64_t diff = k_uptime_delta(&start_ms);

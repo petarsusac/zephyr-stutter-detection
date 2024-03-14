@@ -11,8 +11,7 @@ typedef struct output_values
 {
     float block;
     float prolongation;
-    float word_rep;
-    float sound_rep;
+    float repetition;
 } output_values_t;
 
 int inference_setup(void);
