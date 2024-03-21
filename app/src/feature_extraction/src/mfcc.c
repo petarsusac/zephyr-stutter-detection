@@ -32,9 +32,11 @@
 #define HOP_LEN 512U        /* Number of overlapping samples between successive frames */
 #define NUM_MELS 128U       /* Number of mel bands */
 #define NUM_MEL_COEFS 2023U /* Number of mel filter weights. Returned by MelFilterbank_Init */
-#define NUM_MFCC 20U        /* Number of MFCCs to return */
+#define NUM_MFCC 13U        /* Number of MFCCs to return */
 
 #define GAIN (1.00)
+
+#define NORMALIZE_MFCC 1
 
 LOG_MODULE_REGISTER(mfcc, LOG_LEVEL_DBG);
 
@@ -144,6 +146,21 @@ int mfcc_run(int16_t *p_in_signal, float *p_out_mfcc, uint32_t signal_len)
             p_out_mfcc[i * num_frames + frame_index] = pOutColBuffer[i];
         }
     }
+
+#if NORMALIZE_MFCC
+    float min, max, std;
+    const uint32_t num_elements = num_frames * NUM_MFCC;
+
+    arm_min_no_idx_f32(p_out_mfcc, num_elements, &min);
+    arm_max_no_idx_f32(p_out_mfcc, num_elements, &max);
+
+    arm_offset_f32(p_out_mfcc, -1.0f * min, p_out_mfcc, num_elements);
+    arm_scale_f32(p_out_mfcc, 1.0f / (max - min), p_out_mfcc, num_elements);
+
+    arm_std_f32(p_out_mfcc, num_elements, &std);
+
+    arm_scale_f32(p_out_mfcc, 1.0f / std, p_out_mfcc, num_elements);
+#endif /* NORMALIZE_MFCC */
 
     return 0;
 }
