@@ -36,8 +36,6 @@
 
 #define GAIN (1.00)
 
-#define NORMALIZE_MFCC 1
-
 LOG_MODULE_REGISTER(mfcc, LOG_LEVEL_DBG);
 
 static arm_rfft_fast_instance_f32 S_Rfft;
@@ -137,7 +135,10 @@ int mfcc_run(int16_t *p_in_signal, float *p_out_mfcc, uint32_t signal_len)
     {
         buf_to_float_normed(&p_in_signal[HOP_LEN * frame_index], pInFrame, FRAME_LEN);
 
-        arm_scale_f32(pInFrame, GAIN, pInFrame, FRAME_LEN);
+        // arm_scale_f32(pInFrame, GAIN, pInFrame, FRAME_LEN);
+        float frame_max;
+        arm_absmax_no_idx_f32(pInFrame, FRAME_LEN, &frame_max);
+        arm_scale_f32(pInFrame, 1.0f / frame_max, pInFrame, FRAME_LEN);
 
         MfccColumn(&S_Mfcc, pInFrame, pOutColBuffer);
         /* Reshape column into p_out_mfcc */
@@ -146,21 +147,6 @@ int mfcc_run(int16_t *p_in_signal, float *p_out_mfcc, uint32_t signal_len)
             p_out_mfcc[i * num_frames + frame_index] = pOutColBuffer[i];
         }
     }
-
-#if NORMALIZE_MFCC
-    float min, max, std;
-    const uint32_t num_elements = num_frames * NUM_MFCC;
-
-    arm_min_no_idx_f32(p_out_mfcc, num_elements, &min);
-    arm_max_no_idx_f32(p_out_mfcc, num_elements, &max);
-
-    arm_offset_f32(p_out_mfcc, -1.0f * min, p_out_mfcc, num_elements);
-    arm_scale_f32(p_out_mfcc, 1.0f / (max - min), p_out_mfcc, num_elements);
-
-    arm_std_f32(p_out_mfcc, num_elements, &std);
-
-    arm_scale_f32(p_out_mfcc, 1.0f / std, p_out_mfcc, num_elements);
-#endif /* NORMALIZE_MFCC */
 
     return 0;
 }

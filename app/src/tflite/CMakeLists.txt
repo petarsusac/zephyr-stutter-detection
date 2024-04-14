@@ -7,6 +7,8 @@ zephyr_compile_options($<$<COMPILE_LANGUAGE:CXX>:${NO_THREADSAFE_STATICS}>)
 target_include_directories(app PRIVATE inc)
 
 target_sources(app PRIVATE 
-    src/model.cpp
+    src/model_block.cpp
+    src/model_repetition.cpp
+    src/model_prolongation.cpp
     src/inference.cpp
 )
