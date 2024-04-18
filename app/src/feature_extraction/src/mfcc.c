@@ -46,15 +46,15 @@ static MelSpectrogramTypeDef S_MelSpectr;
 static LogMelSpectrogramTypeDef S_LogMelSpectr;
 static MfccTypeDef S_Mfcc;
 
-static float32_t __dtcm_bss_section pInFrame[FRAME_LEN];
-static float32_t __dtcm_bss_section pOutColBuffer[NUM_MFCC];
-static float32_t __dtcm_bss_section pWindowFuncBuffer[FRAME_LEN];
-static float32_t __dtcm_bss_section pSpectrScratchBuffer[FFT_LEN];
-static float32_t __dtcm_bss_section pDCTCoefsBuffer[NUM_MELS * NUM_MFCC];
-static float32_t __dtcm_bss_section pMfccScratchBuffer[NUM_MELS];
-static float32_t __dtcm_bss_section pMelFilterCoefs[NUM_MEL_COEFS];
-static uint32_t __dtcm_bss_section pMelFilterStartIndices[NUM_MELS];
-static uint32_t __dtcm_bss_section pMelFilterStopIndices[NUM_MELS];
+static float32_t pInFrame[FRAME_LEN];
+static float32_t pOutColBuffer[NUM_MFCC];
+static float32_t pWindowFuncBuffer[FRAME_LEN];
+static float32_t pSpectrScratchBuffer[FFT_LEN];
+static float32_t pDCTCoefsBuffer[NUM_MELS * NUM_MFCC];
+static float32_t pMfccScratchBuffer[NUM_MELS];
+static float32_t pMelFilterCoefs[NUM_MEL_COEFS];
+static uint32_t pMelFilterStartIndices[NUM_MELS];
+static uint32_t pMelFilterStopIndices[NUM_MELS];
 
 int mfcc_init(void)
 {
