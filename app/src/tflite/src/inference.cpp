@@ -132,6 +132,8 @@ int inference_run(float *p_input, size_t input_len, output_values_t *p_output_va
 		float model_input_buf[input_len];
 		memcpy(model_input_buf, p_input, input_len * sizeof(float));
 
+		models[i].interpreter->Reset();
+
 		for (size_t j = 0; j < input_len; j++)
 		{
 			// Normalization
