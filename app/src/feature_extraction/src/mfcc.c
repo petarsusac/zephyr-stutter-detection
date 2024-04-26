@@ -34,7 +34,9 @@
 #define NUM_MEL_COEFS 2023U /* Number of mel filter weights. Returned by MelFilterbank_Init */
 #define NUM_MFCC 13U        /* Number of MFCCs to return */
 
-#define GAIN (1.00)
+#define GAIN (1.00f)
+#define MAXINT16 (32767)
+#define SILENCE_TH_ABS (2000)
 
 LOG_MODULE_REGISTER(mfcc, LOG_LEVEL_DBG);
 
@@ -131,14 +133,27 @@ int mfcc_run(int16_t *p_in_signal, float *p_out_mfcc, uint32_t signal_len)
 {
     const uint32_t num_frames = 1 + (signal_len - FRAME_LEN) / HOP_LEN;
 
+    int16_t max;
+    arm_absmax_no_idx_q15(p_in_signal, signal_len, &max);
+    
+    if (max < SILENCE_TH_ABS)
+    {
+        LOG_INF("Clip is silent, processing not started");
+        return -1;
+    }
+
+    const float scaling_factor = (float) MAXINT16 / (float) max;
+
+    for (size_t i = 0; i < signal_len; i++)
+    {
+        p_in_signal[i] = (int16_t) (p_in_signal[i] * scaling_factor);
+    }
+
     for (uint32_t frame_index = 0; frame_index < num_frames; frame_index++)
     {
         buf_to_float_normed(&p_in_signal[HOP_LEN * frame_index], pInFrame, FRAME_LEN);
 
         // arm_scale_f32(pInFrame, GAIN, pInFrame, FRAME_LEN);
-        float frame_max;
-        arm_absmax_no_idx_f32(pInFrame, FRAME_LEN, &frame_max);
-        arm_scale_f32(pInFrame, 1.0f / frame_max, pInFrame, FRAME_LEN);
 
         MfccColumn(&S_Mfcc, pInFrame, pOutColBuffer);
         /* Reshape column into p_out_mfcc */

@@ -119,24 +119,23 @@ static void inference_thread_run(void *p1, void *p2, void *p3)
 
 		int64_t start_ms = k_uptime_get();
 
-		mfcc_run(audio_proc_buf, mfcc, AUDIO_PROC_BUF_SIZE);
+		ret = mfcc_run(audio_proc_buf, mfcc, AUDIO_PROC_BUF_SIZE);
 
-		ret = inference_run(mfcc, FEATURE_SIZE, &output);
-
-		if (ret != 0)
+		if (0 == ret)
 		{
-			LOG_ERR("Inference failed");
+			ret = inference_run(mfcc, FEATURE_SIZE, &output);
 		}
-		else
+
+		if (0 == ret)
 		{
 			LOG_INF("Block: %d%%", (int) (output.block * 100));
 			LOG_INF("Prolongation: %d%%", (int) (output.prolongation * 100));
 			LOG_INF("Repetition: %d%%", (int) (output.repetition * 100));
+
+			int64_t diff = k_uptime_delta(&start_ms);
+
+			LOG_INF("Elapsed: %lld ms", diff);
 		}
-
-		int64_t diff = k_uptime_delta(&start_ms);
-
-		LOG_INF("Elapsed: %lld ms", diff);
 	}
 
 	k_sleep(K_FOREVER);
