@@ -50,9 +50,12 @@ int main(void)
 	microphone_init(p_mic_dev);
 	microphone_start(p_mic_dev);
 
+	// Skip the first second due to a glitch on microphone startup
+	microphone_fill_buffer(p_mic_dev, audio_acq_buf, AUDIO_ACQ_BUF_SIZE);
+
 	for(;;)
 	{
-		microphone_fill_buffer(p_mic_dev, &audio_acq_buf[0], AUDIO_ACQ_BUF_SIZE);
+		microphone_fill_buffer(p_mic_dev, audio_acq_buf, AUDIO_ACQ_BUF_SIZE);
 		memcpy(&audio_proc_buf[audio_proc_buf_index], audio_acq_buf, AUDIO_ACQ_BUF_SIZE * sizeof(int16_t));
 		audio_proc_buf_index += AUDIO_ACQ_BUF_SIZE;
 
