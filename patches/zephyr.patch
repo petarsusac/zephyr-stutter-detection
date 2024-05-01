@@ -1,5 +1,5 @@
 diff --git a/drivers/audio/mpxxdtyy-i2s.c b/drivers/audio/mpxxdtyy-i2s.c
-index a2eb2103bc..3c44fe224f 100644
+index a2eb2103bc..5d7bd52ecd 100644
 --- a/drivers/audio/mpxxdtyy-i2s.c
 +++ b/drivers/audio/mpxxdtyy-i2s.c
 @@ -16,9 +16,17 @@ LOG_MODULE_DECLARE(mpxxdtyy);
@@ -7,7 +7,7 @@ index a2eb2103bc..3c44fe224f 100644
  
  #define NUM_RX_BLOCKS			4
 -#define PDM_BLOCK_MAX_SIZE_BYTES	512
-+#define PDM_BLOCK_MAX_SIZE_BYTES	768
++#define PDM_BLOCK_MAX_SIZE_BYTES	2048
  
 -K_MEM_SLAB_DEFINE(rx_pdm_i2s_mslab, PDM_BLOCK_MAX_SIZE_BYTES, NUM_RX_BLOCKS, 1);
 +#define K_MEM_SLAB_DEFINE_NOCACHE(name, slab_block_size, slab_num_blocks, slab_align) \
@@ -33,7 +33,7 @@ index a2eb2103bc..3c44fe224f 100644
  	i2s_cfg.frame_clk_freq = audio_freq * factor / chan_size;
  	i2s_cfg.block_size = data->pcm_mem_size * (factor / chan_size);
 diff --git a/drivers/audio/mpxxdtyy.c b/drivers/audio/mpxxdtyy.c
-index 4be45e47c6..d60b983b84 100644
+index 784dddb458..78442b04ec 100644
 --- a/drivers/audio/mpxxdtyy.c
 +++ b/drivers/audio/mpxxdtyy.c
 @@ -56,7 +56,7 @@ uint16_t sw_filter_lib_init(const struct device *dev, struct dmic_cfg *cfg)
@@ -54,71 +54,21 @@ index 4be45e47c6..d60b983b84 100644
  		return 0;
  	}
  
-@@ -90,7 +90,7 @@ int sw_filter_lib_run(TPDMFilter_InitStruct *pdm_filter,
- 		      void *pdm_block, void *pcm_block,
- 		      size_t pdm_size, size_t pcm_size)
- {
--	int i;
-+	int i, j;
- 	uint8_t a, b;
- 
- 	if (pdm_block == NULL || pcm_block == NULL || pdm_filter == NULL) {
-@@ -118,23 +118,46 @@ int sw_filter_lib_run(TPDMFilter_InitStruct *pdm_filter,
- 		}
- 	}
- 
-+	// TODO: call Open_PDM_Filter_x once for each ms of data
- 	switch (pdm_filter[0].Decimation) {
- 	case 64:
- 		for (i = 0; i < pdm_filter[0].In_MicChannels; i++) {
--			Open_PDM_Filter_64(&((uint8_t *) pdm_block)[i],
--					   &((uint16_t *) pcm_block)[i],
--					   pdm_filter->MaxVolume,
--					   &pdm_filter[i]);
-+			for (j = 0; j < pcm_size / 2; j += pdm_filter[i].Fs / 1000)
-+			{
-+				int pcm_start = j;
-+				int pdm_start = j * (pdm_filter[i].Decimation >> 3) + i;
-+				Open_PDM_Filter_64(&((uint8_t *) pdm_block)[pdm_start + i],
-+							&((uint16_t *) pcm_block)[pcm_start + i],
-+							pdm_filter->MaxVolume,
-+							&pdm_filter[i]);
-+			}
- 		}
- 		break;
- 	case 128:
- 		for (i = 0; i < pdm_filter[0].In_MicChannels; i++) {
--			Open_PDM_Filter_128(&((uint8_t *) pdm_block)[i],
--					    &((uint16_t *) pcm_block)[i],
--					    pdm_filter->MaxVolume,
--					    &pdm_filter[i]);
-+			for (j = 0; j < pcm_size / 2; j += pdm_filter[i].Fs / 1000)
-+			{
-+				int pcm_start = j;
-+				int pdm_start = j * (pdm_filter[i].Decimation >> 3) + i;
-+				Open_PDM_Filter_128(&((uint8_t *) pdm_block)[pdm_start + i],
-+							&((uint16_t *) pcm_block)[pcm_start + i],
-+							pdm_filter->MaxVolume,
-+							&pdm_filter[i]);
-+			}
- 		}
- 		break;
-+	case 192:
-+		for (i = 0; i < pdm_filter[0].In_MicChannels; i++) {
-+			for (j = 0; j < pcm_size / 2; j += pdm_filter[i].Fs / 1000)
-+			{
-+				int pcm_start = j;
-+				int pdm_start = j * (pdm_filter[i].Decimation >> 3) + i;
-+				Open_PDM_Filter_192(&((uint8_t *) pdm_block)[pdm_start + i],
-+							&((uint16_t *) pcm_block)[pcm_start + i],
-+							pdm_filter->MaxVolume,
-+							&pdm_filter[i]);
-+			}
-+		}
- 	default:
- 		return -EINVAL;
- 	}
-@@ -163,12 +186,16 @@ static int mpxxdtyy_initialize(const struct device *dev)
+@@ -143,7 +143,12 @@ int sw_filter_lib_run(TPDMFilter_InitStruct *pdm_filter,
+ 						pdm_filter->MaxVolume,
+ 						&pdm_filter[i]);
+ 				break;
+-
++			case 192:
++				Open_PDM_Filter_192(&((uint8_t *) pdm_block)[pdm_offset + i],
++						&((uint16_t *) pcm_block)[j + i],
++						pdm_filter->MaxVolume,
++						&pdm_filter[i]);
++				break;
+ 			default:
+ 				return -EINVAL;
+ 			}
+@@ -174,12 +179,16 @@ static int mpxxdtyy_initialize(const struct device *dev)
  	return 0;
  }
  
