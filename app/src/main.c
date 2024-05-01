@@ -14,6 +14,7 @@
 #include "microphone.h"
 #include "inference.h"
 #include "mfcc.h"
+#include "storage.h"
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
@@ -41,6 +42,12 @@ int main(void)
 	gpio_pin_configure_dt(&p_led_dev, GPIO_OUTPUT);
 
 	gpio_pin_set_dt(&p_led_dev, 1);
+
+	ret = storage_init();
+	if (ret != 0)
+	{
+		return -1;
+	}
 
 	ret = mfcc_init();
 	if (ret != 0)
