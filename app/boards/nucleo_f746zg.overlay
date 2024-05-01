@@ -69,3 +69,20 @@
     pinctrl-names = "default";
     current-speed = <115200>;
 };
+
+&sdmmc1 {
+    status = "okay";
+    bus-width = <1>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&sdmmc1_ck_pc12 
+                &sdmmc1_cmd_pd2 
+                &sdmmc1_d0_pc8 
+                &sdmmc1_d1_pc9 
+                &sdmmc1_d2_pc10
+                &sdmmc1_d3_pc11>;
+
+    mmc {
+        compatible = "zephyr,sdmmc-disk";
+        status = "okay";
+    };
+};

@@ -24,3 +24,4 @@ manifest:
           - tflite-micro
           - cmsis-nn
           - cmsis-dsp
+          - fatfs
