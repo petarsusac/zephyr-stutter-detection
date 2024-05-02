@@ -13,7 +13,7 @@
 
 LOG_MODULE_REGISTER(audio_proc, LOG_LEVEL_DBG);
 
-static const char* p_filename = "20240502.txt";
+static const char* p_filename = "20240502-1134.txt";
 static char p_line[STORAGE_MAX_LINE_LEN];
 
 void audio_proc_run(void *p1, void *p2, void *p3)
