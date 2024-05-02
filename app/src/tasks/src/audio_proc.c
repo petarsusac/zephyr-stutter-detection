@@ -2,14 +2,19 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <stdio.h>
 
 #include "inference.h"
 #include "mfcc.h"
 #include "audio_acq.h"
+#include "storage.h"
 
 #define FEATURE_SIZE (13*43)
 
 LOG_MODULE_REGISTER(audio_proc, LOG_LEVEL_DBG);
+
+static const char* p_filename = "20240502.txt";
+static char p_line[STORAGE_MAX_LINE_LEN];
 
 void audio_proc_run(void *p1, void *p2, void *p3)
 {
@@ -42,7 +47,15 @@ void audio_proc_run(void *p1, void *p2, void *p3)
 
 			int64_t diff = k_uptime_delta(&start_ms);
 
-			LOG_INF("Elapsed: %lld ms", diff);
+			LOG_DBG("Elapsed: %lld ms", diff);
+
+			sprintf(p_line, 
+					"yyyy-mm-dd-hh-mm-ss,%d,%d,%d\n",
+					(int) (output.block * 100),
+					(int) (output.prolongation * 100),
+					(int) (output.repetition * 100));
+
+			storage_write_line(p_line, p_filename);
 		}
 	}
 }
