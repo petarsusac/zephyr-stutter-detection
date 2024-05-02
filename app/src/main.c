@@ -26,12 +26,12 @@ K_SEM_DEFINE(proc_run_sem, 0, 1);
 K_THREAD_DEFINE(audio_acq_thread,
 				AUDIO_ACQ_STACK_SIZE, 
 				audio_acq_run, 
-				&proc_run_sem, NULL, NULL, AUDIO_ACQ_PRIO, 0, 0);
+				&proc_run_sem, NULL, NULL, AUDIO_ACQ_PRIO, 0, 100);
 
 K_THREAD_DEFINE(audio_proc_thread,
 				AUDIO_PROC_STACK_SIZE, 
 				audio_proc_run, 
-				&proc_run_sem, NULL, NULL, AUDIO_PROC_PRIO, 0, 0);
+				&proc_run_sem, NULL, NULL, AUDIO_PROC_PRIO, 0, 100);
 
 int main(void)
 {
