@@ -67,7 +67,5 @@ int main(void)
 		return -1;
 	}
 
-	k_sleep(K_FOREVER);
-
 	return 0;
 }
