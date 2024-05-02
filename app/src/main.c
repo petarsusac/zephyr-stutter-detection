@@ -22,16 +22,17 @@ static struct gpio_dt_spec p_led_dev = GPIO_DT_SPEC_GET(DT_ALIAS(led2), gpios);
 static const struct device *const p_mic_dev = DEVICE_DT_GET(DT_NODELABEL(mp34dt06j));
 
 K_SEM_DEFINE(proc_run_sem, 0, 1);
+K_SEM_DEFINE(start_sem, 0, 1);
 
 K_THREAD_DEFINE(audio_acq_thread,
 				AUDIO_ACQ_STACK_SIZE, 
 				audio_acq_run, 
-				&proc_run_sem, NULL, NULL, AUDIO_ACQ_PRIO, 0, 100);
+				&proc_run_sem, &start_sem, NULL, AUDIO_ACQ_PRIO, 0, 0);
 
 K_THREAD_DEFINE(audio_proc_thread,
 				AUDIO_PROC_STACK_SIZE, 
 				audio_proc_run, 
-				&proc_run_sem, NULL, NULL, AUDIO_PROC_PRIO, 0, 100);
+				&proc_run_sem, NULL, NULL, AUDIO_PROC_PRIO, 0, 0);
 
 int main(void)
 {
@@ -66,6 +67,8 @@ int main(void)
 	{
 		return -1;
 	}
+
+	k_sem_give(&start_sem);
 
 	return 0;
 }

@@ -19,7 +19,10 @@ void audio_acq_run(void *p1, void *p2, void *p3)
 {
 	size_t scnd_buf_index = 0;
 
-    struct k_sem *p_sem = (struct k_sem *) p1;
+    struct k_sem *p_buf_full_sem = (struct k_sem *) p1;
+	struct k_sem *p_start_sem = (struct k_sem *) p2;
+
+	k_sem_take(p_start_sem, K_FOREVER);
 
     microphone_start(p_mic_dev);
 
@@ -35,7 +38,7 @@ void audio_acq_run(void *p1, void *p2, void *p3)
 		if (scnd_buf_index >= AUDIO_ACQ_SCND_BUF_SIZE)
 		{
 			scnd_buf_index = 0;
-			k_sem_give(p_sem);
+			k_sem_give(p_buf_full_sem);
 		}
 	}
 
