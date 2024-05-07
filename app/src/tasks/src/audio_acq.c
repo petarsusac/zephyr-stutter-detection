@@ -15,6 +15,11 @@ static const struct device *const p_uart_dev = DEVICE_DT_GET(DT_NODELABEL(usart2
 
 static int print_buffer(const struct device *p_uart, int16_t *buf, size_t len);
 
+int audio_acq_init(void)
+{
+	return microphone_init(p_mic_dev);
+}
+
 void audio_acq_run(void *p1, void *p2, void *p3)
 {
 	size_t scnd_buf_index = 0;

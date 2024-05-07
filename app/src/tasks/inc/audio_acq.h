@@ -12,6 +12,7 @@
 #define AUDIO_ACQ_STACK_SIZE (1024U)
 #define AUDIO_ACQ_PRIO (1U)
 
+int audio_acq_init(void);
 void audio_acq_run(void *p1, void *p2, void *p3);
 int16_t *audio_acq_get_primary_buf_ptr(void);
 int16_t *audio_acq_get_secondary_buf_ptr(void);

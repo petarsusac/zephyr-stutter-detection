@@ -13,9 +13,6 @@
 #include "audio_acq.h"
 #include "bt_ncp.h"
 #include "microphone.h"
-#include "inference.h"
-#include "mfcc.h"
-#include "storage.h"
 
 #define INIT_DELAY_MS (500U)
 #define BT_CONN_TIMEOUT_MS (10000U)
@@ -23,7 +20,6 @@
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 static struct gpio_dt_spec p_led_dev = GPIO_DT_SPEC_GET(DT_ALIAS(led2), gpios);
-static const struct device *const p_mic_dev = DEVICE_DT_GET(DT_NODELABEL(mp34dt06j));
 
 K_SEM_DEFINE(proc_run_sem, 0, 1);
 K_SEM_DEFINE(start_sem, 0, 1);
@@ -48,27 +44,14 @@ int main(void)
 	gpio_pin_configure_dt(&p_led_dev, GPIO_OUTPUT);
 
 	gpio_pin_set_dt(&p_led_dev, 1);
-
-	ret = storage_init();
-	// Temporarily commented out to be able to debug without using the SD card
-	// if (ret != 0)
-	// {
-	//  return -1;
-	// }
-
-	ret = mfcc_init();
+	
+	ret = audio_acq_init();
 	if (ret != 0)
 	{
 		return -1;
 	}
 
-	ret = inference_setup();
-	if (ret != 0)
-	{
-		return -1;
-	}
-
-	ret = microphone_init(p_mic_dev);
+	ret = audio_proc_init();
 	if (ret != 0)
 	{
 		return -1;

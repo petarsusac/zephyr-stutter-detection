@@ -6,8 +6,8 @@
 
 #include "inference.h"
 #include "mfcc.h"
-#include "audio_acq.h"
 #include "storage.h"
+#include "audio_acq.h"
 
 #define FEATURE_SIZE (13*43)
 
@@ -15,6 +15,32 @@ LOG_MODULE_REGISTER(audio_proc, LOG_LEVEL_DBG);
 
 static const char* p_filename = "20240502-1134.txt";
 static char p_line[STORAGE_MAX_LINE_LEN];
+
+int audio_proc_init(void)
+{
+	int ret;
+
+	ret = storage_init();
+	// Temporarily commented out to be able to debug without using the SD card
+	// if (ret != 0)
+	// {
+	//  return ret;
+	// }
+
+	ret = mfcc_init();
+	if (ret != 0)
+	{
+		return ret;
+	}
+
+	ret = inference_setup();
+	if (ret != 0)
+	{
+		return ret;
+	}
+
+	return 0;
+}
 
 void audio_proc_run(void *p1, void *p2, void *p3)
 {
