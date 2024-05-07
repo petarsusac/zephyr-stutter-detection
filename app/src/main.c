@@ -11,10 +11,14 @@
 
 #include "audio_proc.h"
 #include "audio_acq.h"
+#include "bt_ncp.h"
 #include "microphone.h"
 #include "inference.h"
 #include "mfcc.h"
 #include "storage.h"
+
+#define INIT_DELAY_MS (500U)
+#define BT_CONN_TIMEOUT_MS (10000U)
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
@@ -23,6 +27,7 @@ static const struct device *const p_mic_dev = DEVICE_DT_GET(DT_NODELABEL(mp34dt0
 
 K_SEM_DEFINE(proc_run_sem, 0, 1);
 K_SEM_DEFINE(start_sem, 0, 1);
+K_SEM_DEFINE(bt_rdy_sem, 0, 1);
 
 K_THREAD_DEFINE(audio_acq_thread,
 				AUDIO_ACQ_STACK_SIZE, 
@@ -45,10 +50,11 @@ int main(void)
 	gpio_pin_set_dt(&p_led_dev, 1);
 
 	ret = storage_init();
-	if (ret != 0)
-	{
-		return -1;
-	}
+	// Temporarily commented out to be able to debug without using the SD card
+	// if (ret != 0)
+	// {
+	//  return -1;
+	// }
 
 	ret = mfcc_init();
 	if (ret != 0)
@@ -67,6 +73,16 @@ int main(void)
 	{
 		return -1;
 	}
+
+	ret = bt_ncp_init();
+	if (ret != 0)
+	{
+		return -1;
+	}
+
+	k_msleep(INIT_DELAY_MS);
+
+	bt_ncp_wait_for_connection(BT_CONN_TIMEOUT_MS);
 
 	k_sem_give(&start_sem);
 
