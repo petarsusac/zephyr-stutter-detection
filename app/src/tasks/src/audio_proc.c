@@ -16,6 +16,8 @@ LOG_MODULE_REGISTER(audio_proc, LOG_LEVEL_DBG);
 static const char* p_filename = "20240502-1134.txt";
 static char p_line[STORAGE_MAX_LINE_LEN];
 
+static K_SEM_DEFINE(proc_start_sem, 0, 1);
+
 int audio_proc_init(void)
 {
 	int ret;
@@ -42,19 +44,22 @@ int audio_proc_init(void)
 	return 0;
 }
 
+void audio_proc_start(void)
+{
+	k_sem_give(&proc_start_sem);
+}
+
 void audio_proc_run(void *p1, void *p2, void *p3)
 {
 	int ret;
 	float mfcc[FEATURE_SIZE];
 	output_values_t output;
 
-	struct k_sem *p_sem = (struct k_sem *) p1;
-
 	int16_t *p_audio_buf = audio_acq_get_secondary_buf_ptr();
 
 	for (;;)
 	{
-		k_sem_take(p_sem, K_FOREVER);
+		k_sem_take(&proc_start_sem, K_FOREVER);
 
 		int64_t start_ms = k_uptime_get();
 

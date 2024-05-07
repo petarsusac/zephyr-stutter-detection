@@ -7,7 +7,7 @@
 
 LOG_MODULE_REGISTER(bt_ncp, LOG_LEVEL_DBG);
 
-K_SEM_DEFINE(conn_wait_sem, 0, 1);
+static K_SEM_DEFINE(conn_wait_sem, 0, 1);
 
 static bool bt_connected;
 

@@ -5,6 +5,8 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/logging/log.h>
 
+#include "audio_proc.h"
+
 LOG_MODULE_REGISTER(audio_acq, LOG_LEVEL_DBG);
 
 static int16_t __dtcm_bss_section prim_buf[AUDIO_ACQ_PRIM_BUF_SIZE];
@@ -13,6 +15,8 @@ static int16_t __dtcm_bss_section scnd_buf[AUDIO_ACQ_SCND_BUF_SIZE];
 static const struct device *const p_mic_dev = DEVICE_DT_GET(DT_NODELABEL(mp34dt06j));
 static const struct device *const p_uart_dev = DEVICE_DT_GET(DT_NODELABEL(usart2));
 
+static K_SEM_DEFINE(start_sem, 0, 1);
+
 static int print_buffer(const struct device *p_uart, int16_t *buf, size_t len);
 
 int audio_acq_init(void)
@@ -20,14 +24,16 @@ int audio_acq_init(void)
 	return microphone_init(p_mic_dev);
 }
 
+void audio_acq_start(void)
+{
+	k_sem_give(&start_sem);
+}
+
 void audio_acq_run(void *p1, void *p2, void *p3)
 {
 	size_t scnd_buf_index = 0;
 
-    struct k_sem *p_buf_full_sem = (struct k_sem *) p1;
-	struct k_sem *p_start_sem = (struct k_sem *) p2;
-
-	k_sem_take(p_start_sem, K_FOREVER);
+	k_sem_take(&start_sem, K_FOREVER);
 
     microphone_start(p_mic_dev);
 
@@ -43,7 +49,7 @@ void audio_acq_run(void *p1, void *p2, void *p3)
 		if (scnd_buf_index >= AUDIO_ACQ_SCND_BUF_SIZE)
 		{
 			scnd_buf_index = 0;
-			k_sem_give(p_buf_full_sem);
+			audio_proc_start();
 		}
 	}
 
