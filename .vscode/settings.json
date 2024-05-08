@@ -4,8 +4,8 @@
     "files.associations": {
     },
     "kconfig.zephyr.board": {
-        "board": "stm32f746g_disco",
+        "board": "nucleo_f746zg",
         "arch": "arm",
-        "dir": "/home/petar/zephyrproject/zephyr/boards/arm/stm32f746g_disco"
+        "dir": "/home/petar/zephyrproject/zephyr/boards/st/nucleo_f746zg"
     }
 }
