@@ -5,9 +5,14 @@
 
 #include "uart.h"
 
+#define QUEUE_SIZE (5U)
+
 LOG_MODULE_REGISTER(bt_ncp, LOG_LEVEL_DBG);
 
 static K_SEM_DEFINE(conn_wait_sem, 0, 1);
+
+K_MSGQ_DEFINE(msg_queue, sizeof(bt_ncp_msg_t), QUEUE_SIZE, 4);
+K_MSGQ_DEFINE(ts_msg_queue, sizeof(bt_ncp_ts_msg_t), QUEUE_SIZE, 4);
 
 static bool bt_connected;
 
@@ -47,8 +52,34 @@ int bt_ncp_wait_for_connection(uint32_t timeout_ms)
     return ret;
 }
 
+int bt_ncp_get_timestamped_msg(bt_ncp_ts_msg_t *p_msg)
+{
+    return k_msgq_get(&ts_msg_queue, p_msg, K_NO_WAIT);
+}
+
+void bt_ncp_run(void *p1, void *p2, void *p3)
+{
+    int err;
+    bt_ncp_ts_msg_t ts_msg;
+
+    for (;;)
+    {
+        err = k_msgq_get(&msg_queue, &ts_msg.msg, K_FOREVER);
+
+        if (0 == err)
+        {
+            // TODO: get timestamp from RTC
+            strncpy(ts_msg.timestamp, "yyyy-mm-dd-hh-mm-ss", 20);
+
+            k_msgq_put(&ts_msg_queue, &ts_msg, K_NO_WAIT);
+        }
+    }
+}
+
 static void uart_rx_cb(const uint8_t *p_data, size_t len)
 {
+    bt_ncp_msg_t msg;
+
     if (!p_data)
     {
         return;
@@ -64,6 +95,8 @@ static void uart_rx_cb(const uint8_t *p_data, size_t len)
 
         case UART_CMD_DATA:
             LOG_DBG("Received data of length %u", len-1);
+            msg.data_1 = p_data[1];
+            k_msgq_put(&msg_queue, &msg, K_NO_WAIT);
         break;
 
         default:
