@@ -1,0 +1,6 @@
+if BOARD_GUGU_MAIN_BOARD
+
+config BOARD
+    default "gugu_main_board"
+
+endif

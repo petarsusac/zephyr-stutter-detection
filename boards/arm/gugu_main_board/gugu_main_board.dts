@@ -1,0 +1,128 @@
+/dts-v1/;
+#include <st/f7/stm32f746Xg.dtsi>
+#include <st/f7/stm32f746zgtx-pinctrl.dtsi>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+    model = "Gugu Main Board";
+    compatible = "gugu,main_board";
+
+    chosen {
+        zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,dtcm = &dtcm;
+    };
+
+    leds: leds {
+        compatible = "gpio-leds";
+    };
+
+    soc {
+        i2s2: i2s@40003800 {
+            compatible = "st,stm32-i2s";
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0x40003800 0x400>;
+            clocks = <&rcc STM32_CLOCK_BUS_APB1 0x00004000>, <&rcc STM32_SRC_PLLI2S_R I2S_SEL(0)>;
+            interrupts = <36 5>;
+            dmas = <&dma1 4 0 0x400 0x3
+				    &dma1 3 0 0x400 0x3>;
+			dma-names = "tx", "rx";
+            pinctrl-0 = <&i2s2_ck_pb13 &i2s2_sd_pb15>;
+            pinctrl-names = "default";
+            status = "okay";
+
+            mp34dt06j: mp34dt06j@0{
+                compatible = "st,mpxxdtyy";
+                status = "okay";
+                reg = <0x0>;
+            };
+        
+        };
+    };
+
+    clocks {
+		plli2s: plli2s {
+			#clock-cells = <0>;
+			compatible = "st,stm32f4-plli2s-clock";
+            mul-n = <192>;
+            div-r = <5>;
+            clocks = <&clk_hse>;
+            clock-names = "plli2s";
+			status = "okay";
+		};
+	};
+};
+
+&clk_lsi {
+	status = "okay";
+};
+
+&clk_hse {
+	hse-bypass;
+	clock-frequency = <DT_FREQ_M(8)>; /* 8MHz clock */
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(216)>;
+	ahb-prescaler = <1>;
+	apb1-prescaler = <4>;
+	apb2-prescaler = <2>;
+};
+
+&pll {
+	div-m = <8>;
+	mul-n = <432>;
+	div-p = <2>;
+	div-q = <9>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+// Debug UART
+&usart2 {
+    status = "okay";
+    pinctrl-0 = <&usart2_tx_pa2 &usart2_rx_pa3>;
+    pinctrl-names = "default";
+    current-speed = <115200>;
+};
+
+// NCP UART
+&usart3 {
+    status = "okay";
+    pinctrl-0 = <&usart3_tx_pb10 &usart3_rx_pb11>;
+    pinctrl-names = "default";
+    current-speed = <115200>;
+};
+
+&i2c1 {
+	pinctrl-0 = <&i2c1_scl_pb6 &i2c1_sda_pb7>;
+	pinctrl-names = "default";
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
+
+    rtc_ext: pcf8563@a2 {
+        compatible = "nxp,pcf8563";
+        status = "okay";
+        reg = <0xa2>;
+    };
+};
+
+&sdmmc1 {
+    status = "okay";
+    bus-width = <1>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&sdmmc1_ck_pc12 
+                &sdmmc1_cmd_pd2 
+                &sdmmc1_d0_pc8 
+                &sdmmc1_d1_pc9 
+                &sdmmc1_d2_pc10
+                &sdmmc1_d3_pc11>;
+
+    mmc {
+        compatible = "zephyr,sdmmc-disk";
+        status = "okay";
+    };
+};

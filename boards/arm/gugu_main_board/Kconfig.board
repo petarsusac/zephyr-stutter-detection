@@ -1,0 +1,3 @@
+config BOARD_GUGU_MAIN_BOARD
+    bool "Gugu Main Board"
+    depends on SOC_STM32F746XX
