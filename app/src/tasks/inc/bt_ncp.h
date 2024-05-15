@@ -8,7 +8,7 @@ typedef struct bt_ncp_msg {
 } bt_ncp_msg_t;
 
 typedef struct bt_ncp_ts_msg {
-    char timestamp[20];
+    int64_t timestamp;
     bt_ncp_msg_t msg;
 } bt_ncp_ts_msg_t;
 

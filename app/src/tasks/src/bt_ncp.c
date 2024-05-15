@@ -2,6 +2,8 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/drivers/rtc.h>
+#include <zephyr/sys/timeutil.h>
 
 #include "uart.h"
 
@@ -13,6 +15,8 @@ static K_SEM_DEFINE(conn_wait_sem, 0, 1);
 
 K_MSGQ_DEFINE(msg_queue, sizeof(bt_ncp_msg_t), QUEUE_SIZE, 4);
 K_MSGQ_DEFINE(ts_msg_queue, sizeof(bt_ncp_ts_msg_t), QUEUE_SIZE, 4);
+
+static const struct device *const p_rtc_dev = DEVICE_DT_GET(DT_NODELABEL(rtc));
 
 static bool bt_connected;
 
@@ -61,6 +65,7 @@ void bt_ncp_run(void *p1, void *p2, void *p3)
 {
     int err;
     bt_ncp_ts_msg_t ts_msg;
+    struct rtc_time rtc_ts;
 
     for (;;)
     {
@@ -68,8 +73,11 @@ void bt_ncp_run(void *p1, void *p2, void *p3)
 
         if (0 == err)
         {
-            // TODO: get timestamp from RTC
-            strncpy(ts_msg.timestamp, "yyyy-mm-dd-hh-mm-ss", 20);
+            err = rtc_get_time(p_rtc_dev, &rtc_ts);
+            if (0 == err)
+            {
+                ts_msg.timestamp = timeutil_timegm64(rtc_time_to_tm(&rtc_ts));
+            }
 
             k_msgq_put(&ts_msg_queue, &ts_msg, K_NO_WAIT);
         }
