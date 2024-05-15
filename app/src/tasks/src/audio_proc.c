@@ -53,7 +53,7 @@ int audio_proc_init(void)
 		return ret;
 	}
 
-	sprintf(filename, "%04d%02d%02d-%02d%02d.csv",
+	snprintf(filename, FILENAME_LEN, "%04hu%02hu%02hu-%02hu%02hu.csv",
 		rtc_ts.tm_year + 1900,
 		rtc_ts.tm_mon,
 		rtc_ts.tm_mday,
