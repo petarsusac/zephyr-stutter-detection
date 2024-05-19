@@ -15,6 +15,16 @@
 
     leds: leds {
         compatible = "gpio-leds";
+        
+        green_led: d303 {
+            gpios = <&gpioe 3 GPIO_ACTIVE_HIGH>;
+			label = "Green LED";
+        };
+
+        red_led: d304 {
+            gpios = <&gpioe 2 GPIO_ACTIVE_HIGH>;
+            label = "Red LED";
+        };
     };
 
     soc {
