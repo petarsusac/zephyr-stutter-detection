@@ -1,6 +1,4 @@
-CONFIG_SOC_SERIES_STM32F7X=y
-CONFIG_SOC_STM32F746XX=y
-
+# SPDX-License-Identifier: Apache-2.0
 # Enable MPU
 CONFIG_ARM_MPU=y
 

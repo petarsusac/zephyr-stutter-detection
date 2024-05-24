@@ -1,0 +1,2 @@
+config BOARD_GUGU_MAIN_BOARD
+    select SOC_STM32F746XX

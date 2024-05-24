@@ -91,6 +91,10 @@
 	status = "okay";
 };
 
+&dma1 {
+	status = "okay";
+};
+
 // Debug UART
 &usart2 {
     status = "okay";
@@ -135,4 +139,11 @@
         compatible = "zephyr,sdmmc-disk";
         status = "okay";
     };
+};
+
+// Internal RTC - for testing only
+&rtc {
+	clocks = <&rcc STM32_CLOCK_BUS_APB1 0x10000000>,
+		 <&rcc STM32_SRC_LSI RTC_SEL(2)>;
+	status = "okay";
 };

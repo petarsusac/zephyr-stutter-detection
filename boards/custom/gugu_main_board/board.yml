@@ -1,0 +1,5 @@
+board:
+  name: gugu_main_board
+  vendor: custom
+  socs:
+    - name: stm32f746xx
