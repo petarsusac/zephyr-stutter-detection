@@ -19,7 +19,7 @@
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
-static struct gpio_dt_spec p_led_dev = GPIO_DT_SPEC_GET(DT_ALIAS(led2), gpios);
+static struct gpio_dt_spec p_led_dev = GPIO_DT_SPEC_GET(DT_NODELABEL(green_led), gpios);
 
 K_THREAD_DEFINE(audio_acq_thread,
 				AUDIO_ACQ_STACK_SIZE, 
