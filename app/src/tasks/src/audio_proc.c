@@ -18,7 +18,7 @@
 
 LOG_MODULE_REGISTER(audio_proc, LOG_LEVEL_DBG);
 
-static const struct device *const p_rtc_dev = DEVICE_DT_GET(DT_NODELABEL(rtc));
+static const struct device *const p_rtc_dev = DEVICE_DT_GET(DT_NODELABEL(rtc_ext));
 
 static char filename[FILENAME_LEN];
 static char line[STORAGE_MAX_LINE_LEN];

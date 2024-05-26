@@ -16,7 +16,7 @@ static K_SEM_DEFINE(conn_wait_sem, 0, 1);
 K_MSGQ_DEFINE(msg_queue, sizeof(bt_ncp_msg_t), QUEUE_SIZE, 4);
 K_MSGQ_DEFINE(ts_msg_queue, sizeof(bt_ncp_ts_msg_t), QUEUE_SIZE, 4);
 
-static const struct device *const p_rtc_dev = DEVICE_DT_GET(DT_NODELABEL(rtc));
+static const struct device *const p_rtc_dev = DEVICE_DT_GET(DT_NODELABEL(rtc_ext));
 
 static bool bt_connected;
 
