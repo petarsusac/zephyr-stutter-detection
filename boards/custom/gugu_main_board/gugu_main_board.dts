@@ -1,6 +1,6 @@
 /dts-v1/;
 #include <st/f7/stm32f746Xg.dtsi>
-#include <st/f7/stm32f746zgtx-pinctrl.dtsi>
+#include <st/f7/stm32f746vgtx-pinctrl.dtsi>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 
 / {
@@ -69,7 +69,6 @@
 };
 
 &clk_hse {
-	hse-bypass;
 	clock-frequency = <DT_FREQ_M(8)>; /* 8MHz clock */
 	status = "okay";
 };
