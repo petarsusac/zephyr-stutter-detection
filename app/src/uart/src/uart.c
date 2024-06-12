@@ -11,7 +11,7 @@ static const struct device *const p_uart_dev = DEVICE_DT_GET(DT_NODELABEL(usart3
 static void char_rx_cb(const struct device *dev, void *user_data);
 
 static uart_rx_cb_t p_user_cb;
-static uint8_t rx_buf[UART_RX_BUF_LEN];
+static uint8_t rx_buf[UART_MAX_MSG_LEN];
 static size_t rx_buf_idx;
 
 int uart_register_rx_cb(uart_rx_cb_t p_cb)
@@ -41,21 +41,28 @@ int uart_register_rx_cb(uart_rx_cb_t p_cb)
 int uart_send_cmd(uart_cmd_t cmd)
 {
     uart_poll_out(p_uart_dev, (uint8_t) cmd);
-    uart_poll_out(p_uart_dev, UART_STOP_BYTE);
+    
+    for (size_t i = 0; i < UART_MAX_MSG_LEN - 1; i++)
+    {
+        uart_poll_out(p_uart_dev, 0);
+    }
 
     return 0;
 }
 
 int uart_send_data(const uint8_t *p_data, size_t len)
 {
+    if (len >= UART_MAX_MSG_LEN)
+    {
+        return -1;
+    }
+
     uart_poll_out(p_uart_dev, UART_CMD_DATA);
 
     for (size_t i = 0; i < len; i++)
     {
         uart_poll_out(p_uart_dev, p_data[i]);
     }
-
-    uart_poll_out(p_uart_dev, UART_STOP_BYTE);
 
     return 0;
 }
@@ -75,24 +82,11 @@ static void char_rx_cb(const struct device *dev, void *user_data)
     // Read UART FIFO byte by byte
     while (1 == uart_fifo_read(dev, &c, 1))
     {
-        // If the end of message is received, call the user cb and clear the
-        // buffer
-        if (UART_STOP_BYTE == c)
+        rx_buf[rx_buf_idx++] = c;
+        if (UART_MAX_MSG_LEN == rx_buf_idx)
         {
-            if (p_user_cb)
-            {
-                p_user_cb(rx_buf, rx_buf_idx);
-            }
-
+            p_user_cb(rx_buf, UART_MAX_MSG_LEN);
             rx_buf_idx = 0;
-        }
-        else if (rx_buf_idx < UART_RX_BUF_LEN)
-        {
-            rx_buf[rx_buf_idx++] = c;
-        }
-        else
-        {
-            LOG_WRN("UART char dropped");
         }
 	}
 }

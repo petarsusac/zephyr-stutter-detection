@@ -5,9 +5,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#define UART_RX_BUF_LEN (5U)
-
-#define UART_STOP_BYTE (0x00)
+#define UART_MAX_MSG_LEN (8U)
 
 typedef enum uart_cmd
 {
