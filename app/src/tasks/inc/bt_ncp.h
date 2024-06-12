@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#define BT_NCP_STACK_SIZE (1024U)
+#define BT_NCP_PRIO (2U)
+
 typedef struct bt_ncp_msg {
     uint8_t hr;
     uint16_t rmssd;

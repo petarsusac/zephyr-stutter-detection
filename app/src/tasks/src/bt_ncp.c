@@ -26,7 +26,7 @@ static const struct device *const p_rtc_dev = DEVICE_DT_GET(DT_NODELABEL(rtc));
 static bool bt_connected;
 
 static void uart_rx_cb(const uint8_t *p_data, size_t len);
-static inline bool parse_msg(bt_ncp_msg_t *msg, uint8_t *p_data, size_t len);
+static inline bool parse_msg(bt_ncp_msg_t *msg, const uint8_t *p_data, size_t len);
 
 int bt_ncp_init()
 {
@@ -128,7 +128,7 @@ static void uart_rx_cb(const uint8_t *p_data, size_t len)
 // Parse the received message into bt_ncp_msg_t struct. `p_data` should point to
 // the message payload (without the command byte). Return true if parsing is
 // successful.
-static inline bool parse_msg(bt_ncp_msg_t *msg, uint8_t *p_data, size_t len)
+static inline bool parse_msg(bt_ncp_msg_t *msg, const uint8_t *p_data, size_t len)
 {
     if (msg && p_data && (PAYLOAD_LENGTH == len))
     {

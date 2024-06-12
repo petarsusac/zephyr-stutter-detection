@@ -33,6 +33,12 @@ K_THREAD_DEFINE(audio_proc_thread,
 				NULL, NULL, NULL, 
 				AUDIO_PROC_PRIO, 0, 0);
 
+K_THREAD_DEFINE(bt_ncp_thread,
+				BT_NCP_STACK_SIZE,
+				bt_ncp_run,
+				NULL, NULL, NULL,
+				BT_NCP_PRIO, 0, 0);
+
 int main(void)
 {
 	int ret;
