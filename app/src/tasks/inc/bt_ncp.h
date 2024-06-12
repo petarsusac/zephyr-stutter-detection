@@ -4,7 +4,10 @@
 #include <stdint.h>
 
 typedef struct bt_ncp_msg {
-    uint8_t data_1;
+    uint8_t hr;
+    uint16_t rmssd;
+    uint16_t ppg_amplitude;
+    uint16_t epc;
 } bt_ncp_msg_t;
 
 typedef struct bt_ncp_ts_msg {

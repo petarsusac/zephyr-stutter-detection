@@ -8,6 +8,7 @@
 #include "uart.h"
 
 #define QUEUE_SIZE (5U)
+#define PAYLOAD_LENGTH (7U)
 
 LOG_MODULE_REGISTER(bt_ncp, CONFIG_APP_LOG_LEVEL);
 
@@ -25,6 +26,7 @@ static const struct device *const p_rtc_dev = DEVICE_DT_GET(DT_NODELABEL(rtc));
 static bool bt_connected;
 
 static void uart_rx_cb(const uint8_t *p_data, size_t len);
+static inline bool parse_msg(bt_ncp_msg_t *msg, uint8_t *p_data, size_t len);
 
 int bt_ncp_init()
 {
@@ -107,13 +109,37 @@ static void uart_rx_cb(const uint8_t *p_data, size_t len)
 
         case UART_CMD_DATA:
             LOG_DBG("Received data of length %u", len-1);
-            msg.data_1 = p_data[1];
-            k_msgq_put(&msg_queue, &msg, K_NO_WAIT);
+            if (parse_msg(&msg, &p_data[1], len-1))
+            {
+                k_msgq_put(&msg_queue, &msg, K_NO_WAIT);
+            }
+            else
+            {
+                LOG_ERR("Unable to parse message payload");
+            }
         break;
 
         default:
             // Ignore other commands
         break;
 	}
+}
+
+// Parse the received message into bt_ncp_msg_t struct. `p_data` should point to
+// the message payload (without the command byte). Return true if parsing is
+// successful.
+static inline bool parse_msg(bt_ncp_msg_t *msg, uint8_t *p_data, size_t len)
+{
+    if (msg && p_data && (PAYLOAD_LENGTH == len))
+    {
+        msg->hr = p_data[0];
+        msg->rmssd = ((uint16_t) p_data[2] << 8) | p_data[1];
+        msg->ppg_amplitude = ((uint16_t) p_data[4] << 8) | p_data[3];
+        msg->epc = ((uint16_t) p_data[6] << 8) | p_data[5];
+
+        return true;
+    }
+
+    return false;
 }
 

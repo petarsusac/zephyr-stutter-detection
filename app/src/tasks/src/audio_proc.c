@@ -11,9 +11,11 @@
 #include "mfcc.h"
 #include "storage.h"
 #include "audio_acq.h"
+#include "bt_ncp.h"
 
 #define FEATURE_SIZE (13*43)
-#define FILENAME_LEN (18U)
+#define FILENAME_INF_RES_LEN (18U)
+#define FILENAME_BIOMED_LEN (25U)
 #define SET_TIME 1
 
 LOG_MODULE_REGISTER(audio_proc, CONFIG_APP_LOG_LEVEL);
@@ -24,7 +26,8 @@ static const struct device *const p_rtc_dev = DEVICE_DT_GET(DT_NODELABEL(rtc_ext
 static const struct device *const p_rtc_dev = DEVICE_DT_GET(DT_NODELABEL(rtc));
 #endif /* CONFIG_EXTERNAL_RTC */
 
-static char filename[FILENAME_LEN];
+static char filename_inf_res[FILENAME_INF_RES_LEN];
+static char filename_biomed[FILENAME_BIOMED_LEN];
 static char line[STORAGE_MAX_LINE_LEN];
 
 static K_SEM_DEFINE(proc_start_sem, 0, 1);
@@ -57,7 +60,18 @@ int audio_proc_init(void)
 		return ret;
 	}
 
-	snprintf(filename, FILENAME_LEN, "%04hu%02hu%02hu-%02hu%02hu.csv",
+	snprintf(filename_inf_res, 
+		FILENAME_INF_RES_LEN, 
+		"%04hu%02hu%02hu-%02hu%02hu.csv",
+		rtc_ts.tm_year + 1900,
+		rtc_ts.tm_mon,
+		rtc_ts.tm_mday,
+		rtc_ts.tm_hour,
+		rtc_ts.tm_min);
+
+	snprintf(filename_biomed, 
+		FILENAME_BIOMED_LEN, 
+		"%04hu%02hu%02hu-%02hu%02hu_biomed.csv",
 		rtc_ts.tm_year + 1900,
 		rtc_ts.tm_mon,
 		rtc_ts.tm_mday,
@@ -98,6 +112,7 @@ void audio_proc_run(void *p1, void *p2, void *p3)
 	output_values_t output;
 	struct rtc_time rtc_ts;
 	int64_t posix_ts;
+	bt_ncp_ts_msg_t biomed_entry;
 
 	int16_t *p_audio_buf = audio_acq_get_secondary_buf_ptr();
 
@@ -113,6 +128,12 @@ void audio_proc_run(void *p1, void *p2, void *p3)
 		{
 			ret = inference_run(mfcc, FEATURE_SIZE, &output);
 		}
+		else
+		{
+			output.block = 0.0f;
+			output.prolongation = 0.0f;
+			output.repetition = 0.0f;
+		}
 
 		if (0 == ret)
 		{
@@ -124,6 +145,7 @@ void audio_proc_run(void *p1, void *p2, void *p3)
 
 			LOG_DBG("Elapsed: %lld ms", diff);
 
+			// Write inference results to file
 			rtc_get_time(p_rtc_dev, &rtc_ts);
 			posix_ts = timeutil_timegm64(rtc_time_to_tm(&rtc_ts));
 
@@ -133,7 +155,23 @@ void audio_proc_run(void *p1, void *p2, void *p3)
 					(int) (output.prolongation * 100),
 					(int) (output.repetition * 100));
 
-			storage_write_line(line, filename);
+			storage_write_line(line, filename_inf_res);
 		}
+
+		// Write biomedical data to file
+		do {
+			ret = bt_ncp_get_timestamped_msg(&biomed_entry);
+			if (0 == ret)
+			{
+				sprintf(line, "%lld,%u,%u,%u,%u\n",
+						biomed_entry.timestamp,
+						biomed_entry.msg.hr,
+						biomed_entry.msg.rmssd,
+						biomed_entry.msg.ppg_amplitude,
+						biomed_entry.msg.epc);
+
+				storage_write_line(line, filename_biomed);
+			}
+		} while (0 == ret);
 	}
 }
