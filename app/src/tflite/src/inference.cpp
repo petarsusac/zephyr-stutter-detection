@@ -12,7 +12,7 @@
 
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(inference, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(inference, CONFIG_APP_LOG_LEVEL);
 
 namespace {
 	const int num_models = 3;

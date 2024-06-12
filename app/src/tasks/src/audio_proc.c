@@ -16,7 +16,7 @@
 #define FILENAME_LEN (18U)
 #define SET_TIME 1
 
-LOG_MODULE_REGISTER(audio_proc, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(audio_proc, CONFIG_APP_LOG_LEVEL);
 
 #ifdef CONFIG_EXTERNAL_RTC
 static const struct device *const p_rtc_dev = DEVICE_DT_GET(DT_NODELABEL(rtc_ext));

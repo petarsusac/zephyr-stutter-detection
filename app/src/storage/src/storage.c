@@ -9,7 +9,7 @@
 #define DISK_DRIVE_NAME "SD"
 #define DISK_MOUNT_PT "/"DISK_DRIVE_NAME":"
 
-LOG_MODULE_REGISTER(storage, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(storage, CONFIG_APP_LOG_LEVEL);
 
 static const char *disk_mount_pt = DISK_MOUNT_PT;
 

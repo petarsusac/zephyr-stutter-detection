@@ -9,7 +9,7 @@
 
 #define QUEUE_SIZE (5U)
 
-LOG_MODULE_REGISTER(bt_ncp, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(bt_ncp, CONFIG_APP_LOG_LEVEL);
 
 static K_SEM_DEFINE(conn_wait_sem, 0, 1);
 

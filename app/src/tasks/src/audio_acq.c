@@ -7,7 +7,7 @@
 
 #include "audio_proc.h"
 
-LOG_MODULE_REGISTER(audio_acq, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(audio_acq, CONFIG_APP_LOG_LEVEL);
 
 static int16_t __dtcm_bss_section prim_buf[AUDIO_ACQ_PRIM_BUF_SIZE];
 static int16_t __dtcm_bss_section scnd_buf[AUDIO_ACQ_SCND_BUF_SIZE];

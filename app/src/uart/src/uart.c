@@ -4,7 +4,7 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(uart, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(uart, CONFIG_APP_LOG_LEVEL);
 
 static const struct device *const p_uart_dev = DEVICE_DT_GET(DT_NODELABEL(usart3));
 

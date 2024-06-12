@@ -38,7 +38,7 @@
 #define MAXINT16 (32767)
 #define SILENCE_TH_ABS (2000)
 
-LOG_MODULE_REGISTER(mfcc, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(mfcc, CONFIG_APP_LOG_LEVEL);
 
 static arm_rfft_fast_instance_f32 S_Rfft;
 static MelFilterTypeDef S_MelFilter;

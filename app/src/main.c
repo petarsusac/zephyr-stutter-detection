@@ -17,7 +17,7 @@
 #define INIT_DELAY_MS (500U)
 #define BT_CONN_TIMEOUT_MS (10000U)
 
-LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
 
 static struct gpio_dt_spec p_led_dev = GPIO_DT_SPEC_GET(DT_NODELABEL(green_led), gpios);
 
