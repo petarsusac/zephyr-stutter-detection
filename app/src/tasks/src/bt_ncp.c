@@ -56,6 +56,7 @@ int bt_ncp_wait_for_connection(uint32_t timeout_ms)
         else
         {
             LOG_ERR("Timed out waiting for BT connection");
+            uart_disable();
         }
     }
 
