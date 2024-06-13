@@ -19,8 +19,6 @@
 
 LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
 
-static struct gpio_dt_spec p_led_dev = GPIO_DT_SPEC_GET(DT_NODELABEL(green_led), gpios);
-
 K_THREAD_DEFINE(audio_acq_thread,
 				AUDIO_ACQ_STACK_SIZE, 
 				audio_acq_run, 
@@ -44,10 +42,6 @@ int main(void)
 	int ret;
 	
 	LOG_INF("Application start");
-
-	gpio_pin_configure_dt(&p_led_dev, GPIO_OUTPUT);
-
-	gpio_pin_set_dt(&p_led_dev, 1);
 	
 	ret = audio_acq_init();
 	if (ret != 0)
