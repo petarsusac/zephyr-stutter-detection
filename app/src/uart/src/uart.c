@@ -38,6 +38,11 @@ int uart_register_rx_cb(uart_rx_cb_t p_cb)
     return err;
 }
 
+void uart_disable(void)
+{
+    uart_irq_rx_disable(p_uart_dev);
+}
+
 int uart_send_cmd(uart_cmd_t cmd)
 {
     uart_poll_out(p_uart_dev, (uint8_t) cmd);
@@ -83,7 +88,7 @@ static void char_rx_cb(const struct device *dev, void *user_data)
     while (1 == uart_fifo_read(dev, &c, 1))
     {
         rx_buf[rx_buf_idx++] = c;
-        if (UART_MAX_MSG_LEN == rx_buf_idx)
+        if (UART_MAX_MSG_LEN == rx_buf_idx && p_user_cb)
         {
             p_user_cb(rx_buf, UART_MAX_MSG_LEN);
             rx_buf_idx = 0;

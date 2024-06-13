@@ -17,6 +17,7 @@ typedef enum uart_cmd
 typedef void (*uart_rx_cb_t)(const uint8_t *p_data, size_t len);
 
 int uart_register_rx_cb(uart_rx_cb_t p_cb);
+void uart_disable(void);
 int uart_send_cmd(uart_cmd_t cmd);
 int uart_send_data(const uint8_t *p_data, size_t len);
 
