@@ -107,7 +107,7 @@
     status = "okay";
     pinctrl-0 = <&usart3_tx_pb10 &usart3_rx_pb11>;
     pinctrl-names = "default";
-    current-speed = <115200>;
+    current-speed = <19200>;
 };
 
 &i2c1 {

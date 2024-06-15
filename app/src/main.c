@@ -14,8 +14,8 @@
 #include "bt_ncp.h"
 #include "microphone.h"
 
-#define INIT_DELAY_MS (500U)
-#define BT_CONN_TIMEOUT_MS (10000U)
+#define INIT_DELAY_MS (1000U)
+#define BT_CONN_TIMEOUT_MS (60000U)
 
 LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
 
