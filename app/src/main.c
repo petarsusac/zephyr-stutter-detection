@@ -14,7 +14,6 @@
 #include "bt_ncp.h"
 #include "microphone.h"
 
-#define INIT_DELAY_MS (1000U)
 #define BT_CONN_TIMEOUT_MS (60000U)
 
 LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
@@ -60,8 +59,6 @@ int main(void)
 	{
 		return -1;
 	}
-
-	k_msleep(INIT_DELAY_MS);
 
 	bt_ncp_wait_for_connection(BT_CONN_TIMEOUT_MS);
 

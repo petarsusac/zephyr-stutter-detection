@@ -55,28 +55,23 @@ int bt_ncp_wait_for_connection(uint32_t timeout_ms)
 {
     int ret;
 
-    ret = uart_send_cmd(UART_CMD_START);
+    gpio_pin_set_dt(&status_led, 1);
+    k_timer_start(&status_led_tmr, K_MSEC(STATUS_LED_PERIOD_MS), K_MSEC(STATUS_LED_PERIOD_MS));
+    
+    ret = k_sem_take(&conn_wait_sem, K_MSEC(timeout_ms));
 
     if (0 == ret)
     {
-        gpio_pin_set_dt(&status_led, 1);
-        k_timer_start(&status_led_tmr, K_MSEC(STATUS_LED_PERIOD_MS), K_MSEC(STATUS_LED_PERIOD_MS));
-        
-        ret = k_sem_take(&conn_wait_sem, K_MSEC(timeout_ms));
-
-        if (0 == ret)
-        {
-            bt_connected = true;
-        }
-        else
-        {
-            LOG_ERR("Timed out waiting for BT connection");
-            uart_disable();
-        }
-
-        k_timer_stop(&status_led_tmr);
-        gpio_pin_set_dt(&status_led, bt_connected);
+        bt_connected = true;
     }
+    else
+    {
+        LOG_ERR("Timed out waiting for BT connection");
+        uart_disable();
+    }
+
+    k_timer_stop(&status_led_tmr);
+    gpio_pin_set_dt(&status_led, bt_connected);
 
     return ret;
 }
