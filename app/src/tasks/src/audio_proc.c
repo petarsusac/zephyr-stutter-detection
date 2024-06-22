@@ -16,7 +16,6 @@
 #define FEATURE_SIZE (13*43)
 #define FILENAME_INF_RES_LEN (18U)
 #define FILENAME_BIOMED_LEN (25U)
-#define SET_TIME 1
 
 LOG_MODULE_REGISTER(audio_proc, CONFIG_APP_LOG_LEVEL);
 
@@ -37,14 +36,14 @@ int audio_proc_init(void)
 	int ret;
 	struct rtc_time rtc_ts;
 
-#if SET_TIME
-	rtc_ts.tm_year = 124;
-	rtc_ts.tm_mon = 5;
-	rtc_ts.tm_mday = 14;
-	rtc_ts.tm_wday = 2;
-	rtc_ts.tm_hour = 10;
-	rtc_ts.tm_min = 24;
-	rtc_ts.tm_sec = 30;
+#ifdef RTC_SET_TIME
+	rtc_ts.tm_year = RTC_YEAR - 1900;
+	rtc_ts.tm_mon = RTC_MON;
+	rtc_ts.tm_mday = RTC_MDAY;
+	rtc_ts.tm_wday = RTC_WDAY;
+	rtc_ts.tm_hour = RTC_HOUR;
+	rtc_ts.tm_min = RTC_MIN;
+	rtc_ts.tm_sec = RTC_SEC;
 	rtc_ts.tm_nsec = 0;
 
 	ret = rtc_set_time(p_rtc_dev, &rtc_ts);
@@ -52,7 +51,7 @@ int audio_proc_init(void)
 	{
 		return ret;
 	}
-#endif /* SET_TIME */
+#endif /* RTC_SET_TIME */
 
 	ret = rtc_get_time(p_rtc_dev, &rtc_ts);
 	if (ret != 0)
